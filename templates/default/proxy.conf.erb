@@ -13,6 +13,10 @@ server {
       break;
     }
 
+    if ($request_filename ~ "_cluster/settings") {
+      return 403;
+      break;
+    }
     #if ($request_filename ~ "_cluster") {
     #  return 403;
     #  break;
