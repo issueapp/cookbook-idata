@@ -27,7 +27,7 @@ elasticsearch_configure 'elasticsearch' do
 
     'plugin.mandatory' => 'cloud-aws',
 
-    'cloud.aws.access_key' => node.idata.aws_secret_key,
+    'cloud.aws.access_key' => node.idata.aws_access_key,
     'cloud.aws.secret_key' => node.idata.aws_secret_key,
 
     'discovery.type' => 'ec2',
