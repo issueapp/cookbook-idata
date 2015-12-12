@@ -58,13 +58,20 @@ describe 'Elasticsearch' do
       expect(hash['cluster_name']).to eq 'issue-elasticsearch'
     end
 
-    it 'clusters within elasticsearch group' do
+    it 'requires cloud-aws plugin' do
       expect(settings).to include(
-        'discover' => {'type' => 'ec2'},
-        'cloud' => {
-          'ec2' => {
-            'security_group' => 'elasticsearch'
-          }
+        'plugin' => {'mandatory' => 'cloud-aws'}
+      )
+    end
+
+    it 'clusters within elasticsearch group' do
+      expect(settings['discovery']).to include(
+        'type' => 'ec2',
+        'ec2' => {'groups' => 'elasticsearch'}
+      )
+      expect(settings['discovery']['zen']).to include(
+        "ping" => {
+          "multicast" => {"enabled"=>"false"}
         }
       )
     end

@@ -3,7 +3,9 @@ include_recipe 'apt'
 include_recipe 'java'
 
 elasticsearch_user 'elasticsearch'
-elasticsearch_install 'elasticsearch 1.7'
+elasticsearch_install 'elasticsearch' do
+  version '1.7.3'
+end
 
 elasticsearch_plugin 'marvel' do
   url "elasticsearch/marvel/1.3.1"
