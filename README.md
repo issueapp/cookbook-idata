@@ -26,7 +26,7 @@
 
 ## AMI image
 
-- ami-dc8c1ccb  elasticsearch slave
+- ami-f68f1fe1  elasticsearch slave
 - ami-2f8a1a38  elasticsearch master (nginx reverse proxy for SSL and Basic Authentication)
 
 ## Packaging Cookbook Dependencies Locally
