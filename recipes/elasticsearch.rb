@@ -15,6 +15,11 @@ elasticsearch_plugin 'elasticsearch-cloud-aws' do
   url 'elasticsearch/elasticsearch-cloud-aws/2.7.1'
 end
 
+elasticsearch_plugin 'elasticsearch-analysis-url' do
+  # https://github.com/jlinn/elasticsearch-analysis-url
+  url 'https://s3.amazonaws.com/opsworks.issue.by/elasticsearch-analysis-url-2.0.0.zip'
+end
+
 elasticsearch_configure 'elasticsearch' do
   path_data(package: '/data/db/elasticsearch')
   path_logs(package: '/data/log/elasticsearch')
