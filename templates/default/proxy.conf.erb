@@ -6,6 +6,19 @@ server {
   error_log   /var/log/nginx/elasticsearch-errors.log;
   access_log  /var/log/nginx/elasticsearch.log;
 
+  ssl on;
+  ssl_certificate     <%= @cert_path %>;
+  ssl_certificate_key <%= @key_path %>;
+  
+  server_tokens off;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_session_timeout 10m;
+  ssl_ciphers TLS_ECDHE_RSA_WITH_RC4_128_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:TLS_DHE_RSA_WITH_AES_128_CBC_SHA:HIGH:!aNULL:!MD5;
+  ssl_session_cache shared:SSL:10m;
+
+  include <%= @preflight_path %>;
+
   location / {
     # Deny Nodes Shutdown API
     if ($request_filename ~ "_shutdown") {
@@ -39,15 +52,4 @@ server {
     proxy_intercept_errors on;
     proxy_pass http://localhost:9200/;
   }
-
-  ssl on;
-  ssl_certificate     <%= @cert_path %>;
-  ssl_certificate_key <%= @key_path %>;
-  
-  server_tokens off;
-  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-  ssl_prefer_server_ciphers on;
-  ssl_session_timeout 10m;
-  ssl_ciphers TLS_ECDHE_RSA_WITH_RC4_128_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:TLS_DHE_RSA_WITH_AES_128_CBC_SHA:HIGH:!aNULL:!MD5;
-  ssl_session_cache shared:SSL:10m;
 }

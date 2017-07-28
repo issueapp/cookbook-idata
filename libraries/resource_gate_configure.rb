@@ -12,10 +12,11 @@ class GateConfigureResource < Chef::Resource::LWRPBase
   attribute(:ssl, Hash, default: nil)
 
   attribute(:paths, Hash, default: {
-    main:    '/etc/nginx/nginx.conf',
-    proxy:   '/etc/nginx/conf.d/proxy.conf',
-    cors:    '/etc/nginx/conf.d/cors.conf',
-    auth:    '/etc/nginx/conf.d/auth.conf',
+    main:      '/etc/nginx/nginx.conf',
+    preflight: '/etc/nginx/conf.d/preflight.conf',
+    proxy:     '/etc/nginx/conf.d/proxy.conf',
+    cors:      '/etc/nginx/conf.d/cors.conf',
+    auth:      '/etc/nginx/conf.d/auth.conf',
 
     pass:    '/etc/nginx/htpasswd',
 

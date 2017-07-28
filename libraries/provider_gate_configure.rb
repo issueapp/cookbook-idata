@@ -6,8 +6,8 @@ class GateConfigureProvider < Chef::Provider::LWRPBase
   end
 
   action :create do
-    create_main_conf
-    create_proxy_conf
+    create_conf :main
+    create_conf :proxy
     create_pass_file
     create_ssl_file
   end
@@ -16,61 +16,63 @@ class GateConfigureProvider < Chef::Provider::LWRPBase
 
   alias_method :nginx, :new_resource
 
-  def create_main_conf
-    conf = template nginx.paths[:main] do
-      source nginx.templates[:main]
-      owner "root"
-      mode 0644
-      action :nothing
-      variables(
-        run_as: nginx.run_as,
-        proxy_path: nginx.paths[:proxy],
-        worker_count: (node.cpu.total.to_i rescue 1),
-      )
+  def create_conf name
+    case name
+    when :main
+      conf = template nginx.paths[:main] do
+        source nginx.templates[:main]
+        owner "root"
+        mode 0644
+        action :nothing
+        variables(
+          run_as: nginx.run_as,
+          proxy_path: nginx.paths[:proxy],
+          worker_count: (node.cpu.total.to_i rescue 1),
+        )
+      end
+
+    when :proxy
+      create_conf :preflight
+      create_conf :cors
+      create_conf :auth
+
+      conf = template nginx.paths[:proxy] do
+        source nginx.templates[:proxy]
+        owner nginx.run_as
+        group nginx.run_as
+        mode 0755
+        notifies :reload, 'service[nginx]'
+        action :nothing
+        variables(
+          preflight_path: nginx.paths[:preflight],
+          cors_path: nginx.paths[:cors],
+          auth_path: nginx.paths[:auth],
+          key_path: nginx.paths[:key],
+          cert_path: nginx.paths[:cert],
+          monitor_url: node.idata.monitor_url,
+        )
+      end
+
+    when :preflight, :cors
+      conf = template nginx.paths[name] do
+        source nginx.templates[name]
+        owner nginx.run_as
+        group nginx.run_as
+        mode 0755
+        action :nothing
+      end
+
+    when :auth
+      conf = template nginx.paths[:auth] do
+        source nginx.templates[:auth]
+        owner nginx.run_as
+        group nginx.run_as
+        mode 0755
+        action :nothing
+        variables(pass_path: nginx.paths[:pass])
+      end
     end
 
-    conf.run_action(:create)
-    nginx.updated_by_last_action(true) if conf.updated_by_last_action?
-  end
-
-  # proxy elasticsearch and monitor
-  def create_proxy_conf
-    conf = template nginx.paths[:cors] do
-      source nginx.templates[:cors]
-      owner nginx.run_as
-      group nginx.run_as
-      mode 0755
-      action :nothing
-    end
-    conf.run_action(:create)
-    nginx.updated_by_last_action(true) if conf.updated_by_last_action?
-
-    conf = template nginx.paths[:auth] do
-      source nginx.templates[:auth]
-      owner nginx.run_as
-      group nginx.run_as
-      mode 0755
-      action :nothing
-      variables(pass_path: nginx.paths[:pass])
-    end
-    conf.run_action(:create)
-    nginx.updated_by_last_action(true) if conf.updated_by_last_action?
-
-    conf = template nginx.paths[:proxy] do
-      source nginx.templates[:proxy]
-      owner nginx.run_as
-      group nginx.run_as
-      mode 0755
-      notifies :reload, 'service[nginx]'
-      action :nothing
-      variables(
-        cors_path: nginx.paths[:cors],
-        auth_path: nginx.paths[:auth],
-        key_path: nginx.paths[:key],
-        cert_path: nginx.paths[:cert],
-        monitor_url: node.idata.monitor_url,
-      )
-    end
     conf.run_action(:create)
     nginx.updated_by_last_action(true) if conf.updated_by_last_action?
   end
